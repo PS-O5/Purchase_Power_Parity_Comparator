@@ -22,9 +22,20 @@ def process_data(data, country_name):
 
 # Define parameters
 indicator = "NY.GDP.PCAP.PP.CD"  # GDP per capita, PPP (current international $)
-countries = {"DEU": "Germany", "IND": "India"}  # Country codes for Germany and India
+countries = {
+    "DEU": "Germany",
+    "IND": "India",
+    "USA": "USA",
+    "JPN": "Japan",
+    "RUS": "Russia",
+    "CHN": "China",
+    "FRA": "France",
+    "ITA": "Italy",
+    "CAN": "Canada"
+}  # Adding USA, Japan, Russia, China, France, Italy, and Canada
+
 start_year = 2010
-end_year = 2020
+end_year = 2024
 
 # Fetch and process data for each country
 df_list = []
@@ -38,13 +49,34 @@ df_final = df_list[0]
 for df in df_list[1:]:
     df_final = pd.merge(df_final, df, on='Year', how='outer')
 
-# Plot the data
-plt.figure(figsize=(10, 6))
-plt.plot(df_final['Year'], df_final['Germany'], label='Germany', marker='o')
-plt.plot(df_final['Year'], df_final['India'], label='India', marker='o')
-plt.title('GDP per Capita (PPP) Comparison: Germany vs India')
+# Plot the GDP per capita (PPP) for all countries
+plt.figure(figsize=(12, 7))
+for country in countries.values():
+    plt.plot(df_final['Year'], df_final[country], label=country, marker='o')
+
+plt.title('GDP per Capita (PPP) Comparison')
 plt.xlabel('Year')
 plt.ylabel('GDP per Capita (PPP, current international $)')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+# Calculate Purchasing Power Parity (PPP) of India relative to other countries
+df_ppp = df_final.copy()
+for country in countries.values():
+    if country != "India":
+        df_ppp[f"India/{country}"] = df_final["India"] / df_final[country]
+
+# Plot the PPP of India relative to other countries
+plt.figure(figsize=(12, 7))
+for country in countries.values():
+    if country != "India":
+        plt.plot(df_ppp['Year'], df_ppp[f"India/{country}"], label=f"India/{country}", marker='o')
+
+plt.title('India’s Purchasing Power Parity Relative to Other Countries')
+plt.xlabel('Year')
+plt.ylabel('Relative PPP (India’s GDP per Capita / Other Country’s GDP per Capita)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
